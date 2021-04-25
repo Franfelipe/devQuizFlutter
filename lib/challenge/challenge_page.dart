@@ -1,22 +1,105 @@
+import 'dart:developer';
+import 'dart:typed_data';
+
+import 'package:DevQuiz/challenge/challenge_controller.dart';
+import 'package:DevQuiz/challenge/widget/next_button/next_button_widget.dart';
 import 'package:DevQuiz/challenge/widget/question_indicator_widget.dart';
 import 'package:DevQuiz/challenge/widget/quiz/quiz_widget.dart';
+import 'package:DevQuiz/shared/models/question_model.dart';
 import 'package:flutter/material.dart';
 
 class ChallegePage extends StatefulWidget {
-  const ChallegePage({Key? key}) : super(key: key);
+  final List<QuestionModel> questions;
+  const ChallegePage({Key? key, required this.questions}) : super(key: key);
   @override
   _ChallegePageState createState() => _ChallegePageState();
 }
 
 class _ChallegePageState extends State<ChallegePage> {
+  final controller = ChallengeController();
+  final pageController = PageController();
+
+  @override
+  void initState() {
+    pageController.addListener(() {
+      controller.currentPage = pageController.page!.toInt() + 1;
+    });
+    super.initState();
+  }
+
+  void nextPage() {
+    if (controller.currentPage < widget.questions.length)
+      pageController.nextPage(
+          duration: Duration(milliseconds: 200), curve: Curves.linear);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60),
-        child: SafeArea(top: true, child: QuestionIndicatorWidget()),
+        preferredSize: Size.fromHeight(86),
+        child: SafeArea(
+          top: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BackButton(),
+              // backButton ou a função Navigator.pop para voltar a pagina
+              // IconButton(
+              //     icon: Icon(Icons.close),
+              //     onPressed: () {
+              //       Navigator.pop(context);
+              //     }),
+              //
+              // Build apenas uma parte do componente, que nesse caso seria o QuestionIndicator
+              ValueListenableBuilder<int>(
+                valueListenable: controller.currentPageNotifier,
+                builder: (context, value, _) => QuestionIndicatorWidget(
+                    currentPage: value, length: widget.questions.length),
+              )
+            ],
+          ),
+        ),
       ),
-      body: QuizWidget(title: "O que o Flutter faz em sua totalidade?"),
+      body: PageView(
+          physics:
+              NeverScrollableScrollPhysics(), // Trava a rollagem de tela para o lado
+          controller: pageController,
+          children: widget.questions
+              .map(
+                (e) => QuizWidget(
+                  question: e,
+                  onChange: nextPage,
+                ),
+              )
+              .toList()),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: ValueListenableBuilder<int>(
+              valueListenable: controller.currentPageNotifier,
+              builder: (context, value, _) => Row(
+                    children: [
+                      if (value < widget.questions.length)
+                        Expanded(
+                          child: NextButtonWidget.white(
+                            label: "Pular",
+                            onTap: nextPage,
+                          ),
+                        ),
+                      if (value == widget.questions.length)
+                        Expanded(
+                          child: NextButtonWidget.green(
+                            label: "Confirmar",
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                    ],
+                  )),
+        ),
+      ),
     );
   }
 }
