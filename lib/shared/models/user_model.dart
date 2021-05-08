@@ -1,13 +1,17 @@
 import 'dart:convert';
 
 class UserModel {
-  final String name;
-  final String photoUrl;
-  final int score;
+  String? username;
+  String? password;
+  String? name;
+  String? photoUrl;
+  int? score;
 
   UserModel({
-    required this.name,
-    required this.photoUrl,
+    this.username,
+    this.password,
+    this.name,
+    this.photoUrl,
     this.score = 0,
   });
 
@@ -16,6 +20,8 @@ class UserModel {
       'name': name,
       'photoUrl': photoUrl,
       'score': score,
+      'username': username,
+      'password': password
     };
   }
 
@@ -24,6 +30,8 @@ class UserModel {
       name: map['name'],
       photoUrl: map['photoUrl'],
       score: map['score'],
+      password: map['password'],
+      username: map['username'],
     );
   }
 
