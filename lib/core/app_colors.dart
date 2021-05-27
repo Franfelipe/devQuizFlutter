@@ -36,4 +36,8 @@ class AppColors {
   static final Color levelButtonTextMedio = darkGreen;
   static final Color levelButtonTextDificil = Color(0xFFE8891C);
   static final Color levelButtonTextPerito = darkRed;
+
+  //BackGround
+  static final Color backgroundLogin = Color(0xFF8E24AA);
+  static final Color loginButton = Color(0xFF4A148C);
 }
